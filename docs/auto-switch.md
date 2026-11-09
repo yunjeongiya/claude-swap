@@ -15,6 +15,10 @@ Set with `--strategy`, or `cswap config set autoswitch.strategy`.
 
 A cooldown (default 5 min) and a hysteresis margin stop it flip-flopping near the threshold: a proactive switch only lands on an account that's below the threshold *and* better than the current one by the margin — a candidate that clears the margin is always taken, but two accounts hovering at the line never ping-pong. When every account is already over its switch lines, it moves to the one with the most quota left before a limit (the lowest usage on its fullest window, whatever line that window carries) under `best`, `weekly-first` and `consume-first` alike, once that account has twice the current one's remaining quota or 3 points more than it, whichever is less. When every account is exhausted it keeps checking on a bounded slow cadence, waking sooner for an imminent reset. `priority-consume-first` does neither: it holds rather than land on an account over its lines (see [Account priority tiers](#account-priority-tiers)).
 
+## Keeping a manual switch
+
+A manual `cswap switch` is yours to keep if you ask for it: set `cswap config set autoswitch.manualHoldSeconds 1800` and the loop won't proactively move off the account you just picked for that long (reported as `no switch: manual-hold`). It still switches the moment that account actually hits its limit, and the hold ends as soon as the active account is no longer your pick. Only the `cswap switch` command starts a hold — switching from the TUI or the menu bar does not (yet). Off by default (`0`).
+
 ## A separate line for the weekly windows
 
 Set with `--weekly-threshold 97`, or `cswap config set autoswitch.weeklyThreshold 97`.

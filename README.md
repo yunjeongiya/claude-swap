@@ -120,6 +120,7 @@ The weekly ones exist because weekly quota left unused at its reset is lost.
 **Good to know**
 
 - **Thresholds are switch-away lines, not hard caps.** With nothing under its line, or the active account at its limit, auto-switch still lands somewhere rather than stall. `priority-consume-first` is the exception: it never lands on an account at or over its line, so it holds and keeps polling.
+- **A manual `cswap switch` can stick.** Set `cswap config set autoswitch.manualHoldSeconds 1800` and auto-switch won't proactively move off the account you just picked for that long (`no switch: manual-hold`). It still switches the moment that account hits its limit. Only the `cswap switch` command starts a hold. Off by default (`0`).
 - A cooldown (default 5 min) and a hysteresis margin stop it flip-flopping between accounts near the threshold.
 - `--weekly-threshold 97` gives the 7-day and per-model windows their own line, so the weekly budget can run higher than the 5-hour window. `--threshold`, and any per-account threshold, then governs the 5-hour window only.
 - `--model Fable` folds that model's weekly limit into the decision, for when you hit a per-model limit before the account-wide ones. Names are the per-model rows in `cswap list` (e.g. `Fable: 100%`), matched case-insensitively.
@@ -263,7 +264,7 @@ The original flag spellings (`cswap --switch`, `cswap --list`, ...) keep working
 | macOS | macOS Keychain | `~/.claude-swap-backup/` |
 | Linux / WSL | File-based (inside the backup directory, under `credentials/`) | `${XDG_DATA_HOME:-~/.local/share}/claude-swap/` |
 
-Session-mode profiles (`cswap run`) live under the backup directory in `sessions/`. Tool preferences (`settings.json`) and auto-switch state (`autoswitch_state.json` — cooldown and quarantined accounts; delete it to reset) live in the backup directory root.
+Session-mode profiles (`cswap run`) live under the backup directory in `sessions/`. Tool preferences (`settings.json`) and auto-switch state (`autoswitch_state.json` — cooldown, quarantined accounts and your last manual pick; delete it to reset) live in the backup directory root.
 
 On Linux/WSL, set `XDG_DATA_HOME` to override the default location.
 
@@ -309,6 +310,7 @@ cswap config get autoswitch.threshold
 cswap config set autoswitch.threshold 80  # validated: rejects out-of-range values loudly
 cswap config set autoswitch.weeklyThreshold 97  # own switch line for the 7-day/per-model windows
 cswap config set autoswitch.model Fable   # per-model switching (see "auto"); Fable,Opus for several
+cswap config set autoswitch.manualHoldSeconds 1800  # auto won't undo a manual switch for 30 min (0 = off)
 cswap config set run.shareHistory false   # each account keeps its own chat history (see "run")
 cswap config set updates.check false      # no daily PyPI lookup for the "newer version" hint
 cswap config set usage.headerProbe true   # opt in: setup-token usage via a 1-token request (see "add-token")
